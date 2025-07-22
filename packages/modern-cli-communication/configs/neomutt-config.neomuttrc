@@ -1,0 +1,44 @@
+# NeoMutt Email Client Configuration
+# ~/.config/neomutt/neomuttrc
+
+# Basic settings
+set real_name = "Your Name"
+set from = "your.email@example.com"
+set use_from = yes
+set envelope_from = yes
+
+# Account settings (replace with your details)
+set imap_user = "your.email@example.com"
+set imap_pass = "your_password"
+set folder = "imaps://imap.gmail.com:993/"
+set spoolfile = "+INBOX"
+set postponed = "+[Gmail]/Drafts"
+set trash = "+[Gmail]/Trash"
+set record = "+[Gmail]/Sent Mail"
+
+# SMTP settings
+set smtp_url = "smtps://your.email@example.com@smtp.gmail.com:465/"
+set smtp_pass = "your_password"
+
+# Connection settings
+set ssl_starttls = yes
+set ssl_force_tls = yes
+set imap_check_subscribed = yes
+set imap_keepalive = 300
+set mail_check = 120
+set timeout = 300
+
+# Editor
+set editor = "hx"
+set edit_headers = yes
+set autoedit = yes
+
+# Threading
+set sort = threads
+set sort_aux = reverse-last-date-received
+set uncollapse_jump = yes
+set collapse_unread = no
+set thread_received = yes
+
+# Pager settings
+set pager_index

@@ -1,0 +1,77 @@
+# Yazi File Manager Configuration
+# ~/.config/yazi/yazi.toml
+
+[manager]
+ratio = [1, 4, 3]
+sort_by = "modified"
+sort_sensitive = false
+sort_reverse = true
+show_hidden = true
+show_symlink = true
+
+[preview]
+tab_size = 4
+max_width = 600
+max_height = 900
+cache_dir = ""
+
+[opener]
+edit = [
+    { run = 'hx "$@"', desc = "Edit with Helix", block = true, for = "unix" },
+    { run = 'nvim "$@"', desc = "Edit with Neovim", block = true, for = "unix" },
+]
+open = [
+    { run = 'xdg-open "$1"', desc = "Open", for = "linux" },
+]
+reveal = [
+    { run = 'xdg-open "$(dirname "$1")"', desc = "Reveal", for = "linux" },
+]
+extract = [
+    { run = 'ouch decompress "$1"', desc = "Extract here", for = "unix" },
+]
+play = [
+    { run = 'mpv "$@"', desc = "Play with mpv", for = "unix" },
+]
+
+[open]
+rules = [
+    { name = "*/", use = [ "edit", "open", "reveal" ] },
+    { mime = "text/*", use = [ "edit", "reveal" ] },
+    { mime = "image/*", use = [ "open", "reveal" ] },
+    { mime = "video/*", use = [ "play", "reveal" ] },
+    { mime = "audio/*", use = [ "play", "reveal" ] },
+    { mime = "inode/directory", use = [ "open", "reveal" ] },
+    { mime = "application/json", use = [ "edit", "reveal" ] },
+    { mime = "*/javascript", use = [ "edit", "reveal" ] },
+    { mime = "application/zip", use = [ "extract", "reveal" ] },
+    { mime = "application/gzip", use = [ "extract", "reveal" ] },
+    { mime = "application/x-tar", use = [ "extract", "reveal" ] },
+    { mime = "application/x-bzip2", use = [ "extract", "reveal" ] },
+    { mime = "application/x-7z-compressed", use = [ "extract", "reveal" ] },
+]
+
+[tasks]
+micro_workers = 10
+macro_workers = 25
+bizarre_retry = 5
+image_alloc = 536870912  # 512MB
+image_bound = [0, 0]
+suppress_preload = false
+
+[plugin]
+
+[input]
+cursor_blink = false
+
+[select]
+open_title = "Open with:"
+open_origin = "hovered"
+open_offset = [0, 1]
+
+[which]
+sort_by = "none"
+sort_sensitive = false
+sort_reverse = false
+
+[log]
+enabled = false

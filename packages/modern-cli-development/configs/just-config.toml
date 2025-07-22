@@ -1,0 +1,62 @@
+# Just Command Runner Configuration
+# ~/.config/just/config.toml
+
+# Shell settings
+shell = ["fish", "-c"]
+shell_args = []
+
+# Output settings
+verbosity = "normal"  # quiet, normal, verbose
+color = "auto"       # auto, always, never
+dump_format = "just" # just, json
+
+# Execution settings
+dry_run = false
+highlight = true
+no_dependencies = false
+quiet = false
+unstable = false
+
+# Directory settings
+search_up_directories = true
+working_directory = "."
+
+# Load settings
+load_dotenv = true
+dotenv_filename = ".env"
+
+# Aliases
+[aliases]
+# Common development tasks
+dev = "develop"
+fmt = "format"
+chk = "check"
+tst = "test"
+rel = "release"
+cln = "clean"
+
+# Git shortcuts
+st = "status"
+co = "checkout"
+br = "branch"
+ci = "commit"
+pl = "pull"
+ps = "push"
+
+# Build shortcuts
+b = "build"
+r = "run"
+t = "test"
+c = "check"
+f = "format"
+l = "lint"
+
+# Docker shortcuts
+up = "docker-up"
+down = "docker-down"
+logs = "docker-logs"
+
+# Environment shortcuts
+local = "env-local"
+staging = "env-staging"
+prod = "env-production"

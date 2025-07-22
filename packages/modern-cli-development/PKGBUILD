@@ -1,0 +1,49 @@
+# Modern CLI Development Package
+# PKGBUILD-development
+
+pkgname=modern-cli-development
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="Development tools and configurations for modern CLI"
+arch=('any')
+url="https://yourusername.github.io/modern-cli-repo"
+license=('MIT')
+
+depends=(
+    'modern-cli-core'
+    'modern-cli-git'
+    
+    # Code analysis
+    'tokei'        # Line counter
+    'hyperfine'    # Benchmarking
+    
+    # Data processing
+    'yq'           # YAML processor
+    'jq'           # JSON processor (already in core)
+    
+    # Language servers (for Helix)
+    'rust-analyzer'
+    'typescript-language-server'
+    'python-lsp-server'
+    'gopls'
+    'nil'          # Nix language server
+    
+    # Development utilities
+    'just'         # Command runner
+    'watchexec'    # File watcher
+    'entr'         # File watcher alternative
+)
+
+source=(
+    "helix-development.toml"
+    "just-config.toml"
+)
+
+md5sums=('SKIP' 'SKIP')
+
+package() {
+    # Install development configs
+    install -dm755 "$pkgdir/usr/lib/modern-cli/configs"
+    install -Dm644 "$srcdir/helix-development.toml" "$pkgdir/usr/lib/modern-cli/configs/helix-development.toml"
+    install -Dm644 "$srcdir/just-config.toml" "$pkgdir/usr/lib/modern-cli/configs/just-config.toml"
+}

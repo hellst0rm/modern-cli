@@ -1,0 +1,44 @@
+# Modern CLI Music Package
+# PKGBUILD-music
+
+pkgname=modern-cli-music
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="Music and media tools for modern CLI"
+arch=('any')
+url="https://yourusername.github.io/modern-cli-repo"
+license=('MIT')
+
+depends=(
+    'modern-cli-core'
+    
+    # Music players
+    'cmus'
+    'ncmpcpp'
+    'mpd'
+    
+    # Media tools
+    'mpv'
+    'playerctl'
+    'beets'
+    
+    # Download tools
+    'yt-dlp'
+    'aria2'
+)
+
+source=(
+    "cmus-config.rc"
+    "ncmpcpp-config"
+    "mpd-config.conf"
+)
+
+md5sums=('SKIP' 'SKIP' 'SKIP')
+
+package() {
+    # Install music configs
+    install -dm755 "$pkgdir/usr/lib/modern-cli/configs"
+    install -Dm644 "$srcdir/cmus-config.rc" "$pkgdir/usr/lib/modern-cli/configs/cmus-config.rc"
+    install -Dm644 "$srcdir/ncmpcpp-config" "$pkgdir/usr/lib/modern-cli/configs/ncmpcpp-config"
+    install -Dm644 "$srcdir/mpd-config.conf" "$pkgdir/usr/lib/modern-cli/configs/mpd-config.conf"
+}

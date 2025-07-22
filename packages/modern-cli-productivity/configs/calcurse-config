@@ -1,0 +1,97 @@
+# Calcurse Calendar Configuration
+# ~/.config/calcurse/conf
+
+# Appearance
+appearance.calendarview=monthly
+appearance.compactpanels=no
+appearance.defaultpanel=calendar
+appearance.layout=1
+appearance.notifybar=yes
+appearance.sidebarwidth=0
+appearance.theme=red on default
+appearance.todoview=hide-completed
+appearance.headingpos=right-justified
+
+# Format
+format.inputdate=1
+format.notifydate=%a %F
+format.notifytime=%T
+format.outputdate=%D
+format.dayheading=%B %e, %Y
+
+# General
+general.autogc=no
+general.autosave=yes
+general.confirmdelete=yes
+general.confirmquit=yes
+general.firstdayofweek=monday
+general.multipledays=yes
+general.periodicsave=0
+general.systemdialogs=yes
+
+# Notification
+notification.command=printf '\a'
+notification.notifyall=flagged-only
+notification.warning=300
+
+# Daemon
+daemon.enable=no
+daemon.log=no
+
+# Key bindings
+key.add_item=a
+key.cal_view=c
+key.cancel=ESC
+key.config_menu=C
+key.del_item=d
+key.edit_item=e
+key.edit_note=n
+key.end_of_week=E
+key.export=x
+key.flag_item=!
+key.generic_cancel=ESC
+key.generic_change_view=TAB
+key.generic_cmd=:
+key.generic_copy=c
+key.generic_credits=@
+key.generic_cut=^X
+key.generic_goto=g
+key.generic_goto_today=T
+key.generic_help=?
+key.generic_import=i
+key.generic_next_day=>
+key.generic_next_month=}
+key.generic_next_week=W
+key.generic_next_year=)
+key.generic_paste=^V
+key.generic_prev_day=<
+key.generic_prev_month={
+key.generic_prev_week=w
+key.generic_prev_year=(
+key.generic_quit=q
+key.generic_redo=^Y
+key.generic_reload=R
+key.generic_save=^S
+key.generic_scroll_down=^N
+key.generic_scroll_up=^P
+key.generic_select=SPC
+key.generic_undo=^Z
+key.goto_today=g
+key.import=I
+key.lower_priority=+
+key.move_down=j
+key.move_left=h
+key.move_right=l
+key.move_up=k
+key.pipe_item=|
+key.priority=p
+key.raise_priority=-
+key.redraw=^R
+key.repeat_item=r
+key.start_of_week=0
+key.todo_view=t
+key.view_item=v
+
+# Colors
+color.cal_today=cyan on default
+color.cal_item=green on default

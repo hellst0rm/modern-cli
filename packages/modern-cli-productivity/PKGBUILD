@@ -1,0 +1,46 @@
+# Modern CLI Productivity Package
+# PKGBUILD-productivity
+
+pkgname=modern-cli-productivity
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="Productivity and task management tools for modern CLI"
+arch=('any')
+url="https://yourusername.github.io/modern-cli-repo"
+license=('MIT')
+
+depends=(
+    'modern-cli-core'
+    
+    # Task management
+    'taskwarrior'
+    'timewarrior'
+    'vit'
+    
+    # Calendar and scheduling
+    'calcurse'
+    'remind'
+    
+    # Note taking and organization
+    'obsidian-cli'
+    'nb'
+    
+    # Finance
+    'ledger'
+)
+
+source=(
+    "taskwarrior-config.taskrc"
+    "calcurse-config"
+    "vit-config.ini"
+)
+
+md5sums=('SKIP' 'SKIP' 'SKIP')
+
+package() {
+    # Install productivity configs
+    install -dm755 "$pkgdir/usr/lib/modern-cli/configs"
+    install -Dm644 "$srcdir/taskwarrior-config.taskrc" "$pkgdir/usr/lib/modern-cli/configs/taskwarrior-config.taskrc"
+    install -Dm644 "$srcdir/calcurse-config" "$pkgdir/usr/lib/modern-cli/configs/calcurse-config"
+    install -Dm644 "$srcdir/vit-config.ini" "$pkgdir/usr/lib/modern-cli/configs/vit-config.ini"
+}

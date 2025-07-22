@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern CLI Tools - Arch Repository</title>
+    <style>
+        :root {
+            --bg-primary: #1e1e2e;
+            --bg-secondary: #313244;
+            --text-primary: #cdd6f4;
+            --text-secondary: #a6adc8;
+            --accent: #f38ba8;
+            --success: #a6e3a1;
+            --warning: #f9e2af;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+        
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem 0;
+            border-bottom: 2px solid var(--accent);
+        }
+        
+        h1 {
+            font-size: 3rem;
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+        }
+        
+        .quick-start {
+            background: var(--bg-secondary);
+            padding: 2rem;
+            border-radius: 12px;
+            margin: 2rem 0;
+            border-left: 4px solid var(--success);
+        }
+        
+        .command-block {
+            background: #11111b;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            overflow-x: auto;
+            border: 1px solid var(--bg-secondary);
+        }
+        
+        code {
+            color: var(--success);
+            font-size: 0.9rem;
+        }
+        
+        .packages-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .package-card {
+            background: var(--bg-secondary);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-left: 4px solid var(--accent);
+            transition: transform 0.2s;
+        }
+        
+        .package-card:hover {
+            transform: translateY(-4px);
+        }
+        
+        .package-name {
+            color: var(--accent);
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .package-desc {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+        
+        .package-tools {
+            font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .status-success { background: var(--success); color: var(--bg-primary); }
+        .status-warning { background: var(--warning); color: var(--bg-primary); }
+        
+        .footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--bg-secondary);
+            color: var(--text-secondary);
+        }
+        
+        a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+        
+        a:hover {
+            text-decoration: underline;
+        }
+        
+        .build-info {
+            text-align: center;
+            margin: 2rem 0;
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 Modern CLI Tools</h1>
+            <p class="subtitle">Curated collection of modern command-line tools for Arch Linux</p>
+            <div class="build-info">
+                <span class="status-badge status-success">✓ Auto-built</span>
+                <span class="status-badge status-success">✓ Tested</span>
+                <span class="status-badge status-success">✓ Ready</span>
+            </div>
+        </header>
+        
+        <section class="quick-start">
+            <h2>⚡ Quick Start</h2>
+            <div class="command-block">
+                <code># Add repository to /etc/pacman.conf<br>
+[modern-cli-repo]<br>
+Server = https://yourusername.github.io/modern-cli-repo/$arch</code>
+            </div>
+            <div class="command-block">
+                <code># Install and configure<br>
+sudo pacman -Sy modern-cli-meta<br>
+modern-cli install</code>
+            </div>
+        </section>
+        
+        <section>
+            <h2>📦 Available Packages</h2>
+            <div class="packages-grid" id="packages-grid">
+                <!-- Packages loaded dynamically -->
+            </div>
+        </section>
+        
+        <section>
+            <h2>📚 Documentation</h2>
+            <ul>
+                <li><a href="installation.md">Installation Guide</a> - Complete setup instructions</li>
+                <li><a href="usage.md">Usage Guide</a> - How to use the tools effectively</li>
+                <li><a href="https://github.com/yourusername/modern-cli-repo">GitHub Repository</a> - Source code and issues</li>
+            </ul>
+        </section>
+        
+        <footer class="footer">
+            <p>Built with ❤️ using GitHub Actions • Last updated: <span id="last-updated"></span></p>
+            <p><a href="https://github.com/yourusername/modern-cli-repo/actions">View Build Status</a></p>
+        </footer>
+    </div>
+    
+    <script>
+        // Load package information
+        fetch('./packages.json')
+            .then(response => response.json())
+            .then(data => {
+                const grid = document.getElementById('packages-grid');
+                const packages = [
+                    {
+                        name: 'modern-cli-core',
+                        desc: 'Essential modern CLI tools and configurations',
+                        tools: 'fish, helix, yazi, zellij, starship, bat, fd, ripgrep, eza'
+                    },
+                    {
+                        name: 'modern-cli-system',
+                        desc: 'System monitoring and management tools',
+                        tools: 'bottom, procs, dust, duf, bandwhich, hyperfine'
+                    },
+                    {
+                        name: 'modern-cli-git',
+                        desc: 'Advanced Git tools and workflows',
+                        tools: 'lazygit, gitui, git-interactive-rebase-tool'
+                    },
+                    {
+                        name: 'modern-cli-development',
+                        desc: 'Development tools and language servers',
+                        tools: 'rust-analyzer, typescript-language-server, just'
+                    },
+                    {
+                        name: 'modern-cli-meta',
+                        desc: 'Meta package containing all tools',
+                        tools: 'All packages above'
+                    }
+                ];
+                
+                packages.forEach(pkg => {
+                    const card = document.createElement('div');
+                    card.className = 'package-card';
+                    card.innerHTML = `
+                        <div class="package-name">${pkg.name}</div>
+                        <div class="package-desc">${pkg.desc}</div>
+                        <div class="package-tools"><strong>Tools:</strong> ${pkg.tools}</div>
+                    `;
+                    grid.appendChild(card);
+                });
+            })
+            .catch(error => console.error('Error loading packages:', error));
+        
+        // Set last updated time
+        document.getElementById('last-updated').textContent = new Date().toLocaleString();
+    </script>
+</body>
+</html>

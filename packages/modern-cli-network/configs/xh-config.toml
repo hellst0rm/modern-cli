@@ -1,0 +1,157 @@
+# XH HTTP Client Configuration
+# ~/.config/xh/config.toml
+
+# Default request settings
+[request]
+# Default HTTP method
+method = "GET"
+
+# Default timeout in seconds
+timeout = 30
+
+# Follow redirects
+follow_redirects = true
+
+# Maximum number of redirects to follow
+max_redirects = 10
+
+# Verify SSL certificates
+verify_ssl = true
+
+# Default headers to include with every request
+[request.headers]
+"User-Agent" = "xh/modern-cli"
+"Accept" = "application/json, */*"
+
+# Output formatting
+[output]
+# Default output format: auto, json, headers, body, all
+format = "auto"
+
+# Pretty print JSON responses
+pretty = true
+
+# Color output
+color = "auto"
+
+# Show response headers
+headers = false
+
+# Show request and response
+verbose = false
+
+# Stream large responses
+stream = false
+
+# Download responses to file
+download = false
+
+# Authentication settings
+[auth]
+# Default authentication method: basic, bearer, digest
+method = "basic"
+
+# Store authentication credentials (use with caution)
+store_credentials = false
+
+# Proxy settings
+[proxy]
+# HTTP proxy
+http = ""
+
+# HTTPS proxy
+https = ""
+
+# No proxy for these hosts (comma-separated)
+no_proxy = "localhost,127.0.0.1,::1"
+
+# Session settings
+[session]
+# Enable session support
+enabled = true
+
+# Default session directory
+directory = "~/.config/xh/sessions"
+
+# Cookie jar settings
+[cookies]
+# Enable cookie jar
+enabled = true
+
+# Cookie jar file
+jar_file = "~/.config/xh/cookies.txt"
+
+# SSL/TLS settings
+[tls]
+# Verify SSL certificates
+verify = true
+
+# Custom CA certificate file
+ca_cert = ""
+
+# Client certificate file
+client_cert = ""
+
+# Client private key file
+client_key = ""
+
+# TLS version (1.0, 1.1, 1.2, 1.3)
+min_version = "1.2"
+
+# Aliases for common requests
+[aliases]
+# API shortcuts
+api = { base_url = "https://api.example.com", headers = { "Accept" = "application/json" } }
+github = { base_url = "https://api.github.com", headers = { "Accept" = "application/vnd.github.v3+json" } }
+
+# Development endpoints
+local = { base_url = "http://localhost:3000" }
+dev = { base_url = "https://dev.example.com" }
+staging = { base_url = "https://staging.example.com" }
+prod = { base_url = "https://api.example.com" }
+
+# Content type shortcuts
+json = { headers = { "Content-Type" = "application/json" } }
+form = { headers = { "Content-Type" = "application/x-www-form-urlencoded" } }
+xml = { headers = { "Content-Type" = "application/xml" } }
+
+# Custom profiles for different APIs
+[profiles.rest]
+headers = { "Accept" = "application/json", "Content-Type" = "application/json" }
+follow_redirects = true
+pretty = true
+
+[profiles.graphql]
+headers = { "Accept" = "application/json", "Content-Type" = "application/json" }
+method = "POST"
+
+[profiles.debug]
+verbose = true
+headers = true
+pretty = true
+
+# Environment-specific configurations
+[environments.development]
+base_url = "http://localhost:8080"
+verify_ssl = false
+timeout = 60
+
+[environments.staging]
+base_url = "https://staging-api.example.com"
+headers = { "X-Environment" = "staging" }
+
+[environments.production]
+base_url = "https://api.example.com"
+headers = { "X-Environment" = "production" }
+timeout = 15
+
+# Logging settings
+[logging]
+# Log level: error, warn, info, debug, trace
+level = "info"
+
+# Log file location
+file = "~/.config/xh/xh.log"
+
+# Log HTTP requests and responses
+http = false

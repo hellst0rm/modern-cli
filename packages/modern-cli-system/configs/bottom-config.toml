@@ -1,0 +1,38 @@
+# Bottom System Monitor Configuration
+# ~/.config/bottom/bottom.toml
+
+[flags]
+# Basic settings
+color = "default"
+whole_word = false
+case_sensitive = false
+regex = false
+temperature_type = "c"
+rate = 1000
+left_legend = false
+current_usage = false
+group_processes = false
+hide_table_gap = false
+hide_time = false
+autohide_time = false
+use_old_network_legend = false
+expanded = false
+hide_avg_cpu = false
+dot_marker = false
+
+[colors]
+# Catppuccin theme colors
+table_header_color = "Light Blue"
+all_cpu_color = "Light Blue"
+avg_cpu_color = "Blue"
+cpu_core_colors = ["Light Magenta", "Light Yellow", "Light Cyan", "Light Green", "Light Blue", "Cyan", "Green", "Blue"]
+ram_color = "Light Magenta"
+swap_color = "Light Yellow"
+rx_color = "Light Blue"
+tx_color = "Light Red"
+widget_title_color = "Gray"
+border_color = "Gray"
+highlighted_border_color = "Light Blue"
+text_color = "Gray"
+selected_text_color = "Black"
+selected_bg_color = "Light Blue"

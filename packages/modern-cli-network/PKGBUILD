@@ -1,0 +1,42 @@
+# Modern CLI Network Package
+# PKGBUILD-network
+
+pkgname=modern-cli-network
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="Network tools and utilities for modern CLI"
+arch=('any')
+url="https://yourusername.github.io/modern-cli-repo"
+license=('MIT')
+
+depends=(
+    'modern-cli-core'
+    
+    # Modern network tools
+    'dog'        # DNS lookup
+    'xh'         # HTTP client
+    'ouch'       # Archive tool
+    
+    # Traditional tools (enhanced)
+    'curl'
+    'wget'
+    
+    # Network monitoring
+    'bandwhich'  # Network utilization
+    'nmap'       # Network scanner
+    'wireshark-cli'
+)
+
+source=(
+    "xh-config.toml"
+    "curl-config"
+)
+
+md5sums=('SKIP' 'SKIP')
+
+package() {
+    # Install network configs
+    install -dm755 "$pkgdir/usr/lib/modern-cli/configs"
+    install -Dm644 "$srcdir/xh-config.toml" "$pkgdir/usr/lib/modern-cli/configs/xh-config.toml"
+    install -Dm644 "$srcdir/curl-config" "$pkgdir/usr/lib/modern-cli/configs/curl-config"
+}

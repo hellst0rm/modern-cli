@@ -1,0 +1,85 @@
+# Helix Development Configuration
+# ~/.config/helix/development.toml
+# Additional development-specific settings
+
+[editor]
+# Development-specific settings
+auto-completion = true
+auto-format = true
+auto-save = false
+completion-trigger-len = 1
+preview-completion-insert = true
+
+[editor.lsp]
+# Enhanced LSP settings for development
+display-messages = true
+auto-signature-help = true
+display-inlay-hints = true
+display-signature-help-docs = true
+snippets = true
+goto-reference-include-declaration = true
+
+[editor.cursor-shape]
+insert = "bar"
+normal = "block"
+select = "underline"
+
+[editor.file-picker]
+hidden = true
+follow-symlinks = true
+deduplicate-links = true
+parents = true
+ignore = true
+git-ignore = true
+git-global = true
+git-exclude = true
+max-depth = 25
+
+[editor.search]
+smart-case = true
+wrap-around = true
+
+[editor.whitespace]
+render = "all"
+characters = { space = "·", nbsp = "⍽", tab = "→", newline = "⏎", tabpad = "·" }
+
+[editor.indent-guides]
+render = true
+character = "┊"
+skip-levels = 1
+
+# Development-specific key bindings
+[keys.normal]
+# LSP actions
+"space" = { "l" = { "a" = "code_action", "r" = "rename_symbol", "f" = "format", "d" = "goto_definition", "D" = "goto_declaration", "i" = "goto_implementation", "t" = "goto_type_definition", "R" = "goto_reference", "s" = "symbol_picker", "S" = "workspace_symbol_picker", "h" = "hover", "n" = "goto_next_diag", "p" = "goto_prev_diag" } }
+
+# Git integration
+"space" = { "g" = { "g" = ":sh gitui", "l" = ":sh lazygit", "b" = "blame_toggle", "d" = "diff_toggle", "n" = "goto_next_change", "p" = "goto_prev_change" } }
+
+# File operations
+"space" = { "f" = { "f" = "file_picker", "r" = "recent_files", "w" = ":w", "q" = ":q", "x" = ":x" } }
+
+# Project navigation
+"space" = { "p" = { "f" = "file_picker_in_current_directory", "g" = "global_search", "s" = "workspace_symbol_picker", "r" = ":sh just run", "b" = ":sh just build", "t" = ":sh just test" } }
+
+# Terminal integration
+"space" = { "t" = { "t" = ":sh zellij", "f" = ":sh yazi", "g" = ":sh gitui" } }
+
+# Buffer management
+"space" = { "b" = { "n" = "goto_next_buffer", "p" = "goto_previous_buffer", "d" = ":bc" } }
+
+# Window management
+"C-w" = { "h" = "jump_view_left", "j" = "jump_view_down", "k" = "jump_view_up", "l" = "jump_view_right", "s" = "hsplit", "v" = "vsplit", "q" = "wclose" }
+
+[keys.insert]
+# Quick escape
+"j" = { "k" = "normal_mode" }
+
+# Completion navigation
+"C-n" = "completion_next"
+"C-p" = "completion_prev"
+
+[keys.select]
+# Visual mode enhancements
+"u" = "switch_to_lowercase"
+"U" = "switch_to_uppercase"

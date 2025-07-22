@@ -1,0 +1,17 @@
+name: Repository Status
+
+on:
+  workflow_run:
+    workflows: ["Build Packages", "Deploy to GitHub Pages"]
+    types: [completed]
+  schedule:
+    - cron: '0 6 * * *'  # Daily at 6 AM UTC
+
+jobs:
+  status:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Update status badge
+      run: |
+        echo "Repository Status: ${{ github.event.workflow_run.conclusion }}"
+        # Add status badge logic here if needed

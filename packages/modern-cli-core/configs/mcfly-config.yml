@@ -1,0 +1,26 @@
+# McFly Configuration
+# ~/.config/mcfly/config.yml
+
+# Key scheme (vim, emacs)
+key_scheme: vim
+
+# Fuzzy search level (0-2)
+fuzzy: 2
+
+# Number of results to show
+results: 25
+
+# Interface view (TOP, BOTTOM)
+interface_view: TOP
+
+# Delete without confirmation
+delete_without_confirm: true
+
+# Results sort order
+results_sort: LAST_RUN
+
+# Append or prepend to history
+append_to_histfile: true
+
+# Lightmode (for light terminal themes)
+lightmode: false

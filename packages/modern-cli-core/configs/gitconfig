@@ -1,0 +1,100 @@
+# Git Configuration
+# ~/.gitconfig
+
+[user]
+    name = Your Name
+    email = your.email@example.com
+
+[core]
+    pager = delta
+    editor = hx
+    autocrlf = input
+    filemode = true
+
+[interactive]
+    diffFilter = delta --color-only
+
+[delta]
+    navigate = true
+    light = false
+    side-by-side = true
+    line-numbers = true
+    syntax-theme = Catppuccin-mocha
+
+[merge]
+    conflictstyle = diff3
+
+[diff]
+    colorMoved = default
+
+[pull]
+    rebase = true
+
+[rebase]
+    autoStash = true
+    autoSquash = true
+    updateRefs = true
+
+[push]
+    autoSetupRemote = true
+    default = simple
+
+[branch]
+    autoSetupRebase = always
+
+[rerere]
+    enabled = true
+
+[status]
+    showUntrackedFiles = all
+
+[commit]
+    verbose = true
+
+[fetch]
+    prune = true
+    prunetags = true
+
+[log]
+    date = relative
+
+[color]
+    ui = auto
+
+[color "branch"]
+    current = yellow reverse
+    local = yellow
+    remote = green
+
+[color "diff"]
+    meta = yellow bold
+    frag = magenta bold
+    old = red bold
+    new = green bold
+
+[color "status"]
+    added = yellow
+    changed = green
+    untracked = cyan
+
+[alias]
+    # Short aliases
+    st = status
+    co = checkout
+    br = branch
+    ci = commit
+    df = diff
+    dc = diff --cached
+    lg = log --oneline --graph --decorate
+    lga = log --oneline --graph --decorate --all
+    
+    # Useful aliases
+    unstage = reset HEAD --
+    last = log -1 HEAD
+    visual = !gitk
+    
+    # Advanced aliases
+    tree = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+    branch-name = rev-parse --abbrev-ref HEAD
+    publish = "!git push -u origin $(git branch-name)"
+    unpublish = "!git push origin :$(git branch-name)"

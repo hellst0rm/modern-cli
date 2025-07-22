@@ -1,0 +1,33 @@
+# Cmus Music Player Configuration
+# ~/.config/cmus/rc
+
+# Appearance
+colorscheme green
+set format_current= %a - %l - %02n. %t%= %y 
+set format_playlist= %-25%a %3n. %t%= %y %d 
+set format_title=%a - %l - %t (%y)
+set format_trackwin=%3n. %t%= %y %d 
+
+# Behavior
+set auto_reshuffle=true
+set confirm_run=true
+set continue=true
+set play_library=true
+set repeat=false
+set repeat_current=false
+set shuffle=false
+set softvol=false
+set vol_left=70
+set vol_right=70
+
+# Output
+set output_plugin=pulse
+set mixer.pulse.channel=Master
+
+# Key bindings
+bind -f common space win-toggle
+bind -f common q quit -i
+bind -f common + vol +10%
+bind -f common - vol -10%
+bind -f common , seek -1m
+bind -f common . seek +1m

@@ -1,0 +1,32 @@
+# Ripgrep Configuration
+# ~/.config/ripgrep/config
+
+# Always use colors
+--color=always
+
+# Smart case searching
+--smart-case
+
+# Show context around matches
+--context=2
+
+# Exclude common directories
+--glob=!.git/
+--glob=!node_modules/
+--glob=!target/
+--glob=!build/
+--glob=!dist/
+--glob=!.next/
+--glob=!coverage/
+--glob=!.nyc_output/
+--glob=!*.min.js
+--glob=!*.min.css
+
+# Follow symbolic links
+--follow
+
+# Search in hidden files
+--hidden
+
+# Don't respect .gitignore in home directory
+--no-ignore-parent

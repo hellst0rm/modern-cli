@@ -1,0 +1,155 @@
+# W3M Web Browser Configuration
+# ~/.config/w3m/config
+
+# Basic settings
+tabstop 8
+indent_incr 4
+pixel_per_char 7
+pixel_per_line 17
+frame 0
+target_self 0
+open_tab_blank 0
+open_tab_dl_list 0
+display_link 0
+display_link_number 0
+decode_url 0
+display_lineinfo 0
+ext_halfdump 0
+use_proxy 1
+http_proxy 
+https_proxy 
+ftp_proxy 
+no_proxy 
+noproxy_netaddr 1
+no_cache 0
+document_root 
+personal_document_root 
+cgi_bin 
+index_file 
+
+# Editor
+editor hx
+mailer 
+
+# External programs
+extbrowser firefox
+extbrowser2 
+extbrowser3 
+bgextviewer 1
+use_lessopen 0
+
+# Image settings
+auto_image 1
+max_load_image 4
+pseudo_inlines 1
+display_image 1
+fold_textarea 0
+use_graphic_char 0
+
+# Colors
+color 1
+basic_color terminal
+anchor_color blue
+image_color green
+form_color red
+mark_color cyan
+bg_color terminal
+active_style 0
+active_color cyan
+toggle_indent_line 0
+label_topline 0
+nextpage_topline 0
+
+# Search
+ignorecase_search 1
+wrap_search 1
+emacs_like_lineedit 0
+vi_prec_num 0
+mark_all_pages 0
+
+# Rendering
+alt_entity 1
+graphic_char 0
+display_borders 1
+fold_line 0
+show_lnum 0
+show_srch_str 1
+decode_url 0
+display_link_number 0
+display_lineinfo 0
+
+# Navigation
+confirm_qq 1
+close_tab_back 0
+mark_all_pages 0
+wrap_search 1
+use_dictcommand 1
+dictcommand 
+
+# Security
+accept_cookie 1
+accept_bad_cookie 0
+cookie_reject_domains 
+cookie_accept_domains 
+use_cookie 1
+show_cookie 0
+accept_media application,image,text,video
+
+# SSL
+ssl_forbid_method 
+ssl_verify_server 1
+ssl_cert_file 
+ssl_key_file 
+ssl_ca_path 
+ssl_ca_file 
+
+# User agent
+user_agent 
+
+# Meta refresh
+meta_refresh 1
+
+# DNS
+dns_order 0
+
+# Charset
+display_charset UTF-8
+document_charset UTF-8
+system_charset UTF-8
+
+# Keymap settings
+keymap_file keymap
+
+# Form settings
+form_color red
+active_color cyan
+mark_color cyan
+
+# Table settings
+table_expand 1
+table_border 1
+
+# Image settings
+inline_img_protocol 0
+
+# Line editing
+emacs_like_lineedit 0
+space_autocomplete 0
+
+# History
+use_history 1
+history_size 100
+
+# Bookmark
+use_bookmark 1
+bookmark_file ~/.config/w3m/bookmark.html
+
+# Session
+use_session 0
+session_file ~/.config/w3m/session
+
+# Miscellaneous
+confirm_qq 1
+mark_all_pages 0
+label_topline 0
+nextpage_topline 0

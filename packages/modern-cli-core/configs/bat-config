@@ -1,0 +1,21 @@
+# Bat Configuration
+# ~/.config/bat/config
+
+# Set theme
+--theme="Catppuccin-mocha"
+
+# Show line numbers, changes, and header
+--style="numbers,changes,header"
+
+# Set default language for extensionless files
+--map-syntax="*.conf:INI"
+--map-syntax=".ignore:Git Ignore"
+--map-syntax="*.service:INI"
+--map-syntax="Dockerfile*:Dockerfile"
+--map-syntax=".env*:dotenv"
+
+# Paging behavior
+--paging=auto
+
+# Show non-printable characters
+--show-all

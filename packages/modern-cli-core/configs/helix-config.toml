@@ -1,0 +1,99 @@
+# Helix Editor Configuration
+# ~/.config/helix/config.toml
+
+theme = "catppuccin_mocha"
+
+[editor]
+line-number = "relative"
+mouse = true
+middle-click-paste = true
+scroll-lines = 3
+shell = ["fish", "-c"]
+text-width = 100
+completion-trigger-len = 2
+auto-completion = true
+auto-format = true
+auto-save = false
+idle-timeout = 400
+completion-replace = false
+preview-completion-insert = true
+color-modes = true
+
+[editor.statusline]
+left = ["mode", "spinner"]
+center = ["file-name"]
+right = ["diagnostics", "selections", "position", "file-encoding", "file-line-ending", "file-type"]
+separator = "│"
+mode.normal = "NORMAL"
+mode.insert = "INSERT"
+mode.select = "SELECT"
+
+[editor.lsp]
+display-messages = true
+auto-signature-help = true
+display-inlay-hints = true
+display-signature-help-docs = true
+snippets = true
+goto-reference-include-declaration = true
+
+[editor.cursor-shape]
+insert = "bar"
+normal = "block"
+select = "underline"
+
+[editor.file-picker]
+hidden = false
+follow-symlinks = true
+deduplicate-links = true
+parents = true
+ignore = true
+git-ignore = true
+git-global = true
+git-exclude = true
+max-depth = 25
+
+[editor.auto-pairs]
+'(' = ')'
+'{' = '}'
+'[' = ']'
+'"' = '"'
+'`' = '`'
+'<' = '>'
+
+[editor.search]
+smart-case = true
+wrap-around = true
+
+[editor.whitespace]
+render = "all"
+characters = { space = "·", nbsp = "⍽", tab = "→", newline = "⏎", tabpad = "·" }
+
+[editor.indent-guides]
+render = true
+character = "┊"
+skip-levels = 1
+
+[editor.gutters]
+layout = ["diff", "diagnostics", "line-numbers", "spacer"]
+
+[editor.soft-wrap]
+enable = true
+max-wrap = 25
+max-indent-retain = 0
+wrap-indicator = "↪ "
+
+[keys.normal]
+C-s = ":w"
+C-o = "file_picker"
+C-q = ":q"
+A-x = "command_mode"
+A-j = ["extend_to_line_bounds", "delete_selection", "paste_after"]
+A-k = ["extend_to_line_bounds", "delete_selection", "move_line_up", "paste_before"]
+
+[keys.insert]
+C-s = ":w"
+C-space = "completion"
+A-x = "normal_mode"
+
+[keys.select]
+A-x = "normal_mode"

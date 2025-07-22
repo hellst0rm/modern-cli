@@ -1,0 +1,17 @@
+# Tealdeer Configuration
+# ~/.config/tealdeer/config.toml
+
+[display]
+compact = false
+use_pager = false
+
+[style]
+description = "white"
+command_name = "green"
+example_text = "blue"
+example_code = "yellow"
+example_variable = "cyan"
+
+[updates]
+auto_update = true
+auto_update_interval_hours = 24

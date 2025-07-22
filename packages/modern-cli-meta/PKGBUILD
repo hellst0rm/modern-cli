@@ -1,0 +1,89 @@
+# Modern CLI Meta Package (All-in-One)
+# PKGBUILD-meta
+
+pkgname=modern-cli-meta
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="Meta package for all modern CLI tools and configurations"
+arch=('any')
+url="https://yourusername.github.io/modern-cli-repo"
+license=('MIT')
+
+depends=(
+    # Core package (required)
+    'modern-cli-core'
+    
+    # Optional packages
+    'modern-cli-system'
+    'modern-cli-git'
+    'modern-cli-music'
+    'modern-cli-productivity'
+    'modern-cli-communication'
+    'modern-cli-network'
+    'modern-cli-development'
+)
+
+optdepends=(
+    'modern-cli-system: System monitoring tools (procs, dust, bottom)'
+    'modern-cli-git: Advanced Git tools (lazygit, git-interactive-rebase-tool)'
+    'modern-cli-music: Music and media tools (cmus, mpv, yt-dlp)'
+    'modern-cli-productivity: Task management (taskwarrior, calcurse)'
+    'modern-cli-communication: Email and RSS (aerc, newsboat, w3m)'
+    'modern-cli-network: Network tools (dog, xh, bandwhich)'
+    'modern-cli-development: Development tools (language servers, benchmarking)'
+)
+
+# No source files - this is a meta package
+source=()
+md5sums=()
+
+package() {
+    # Create empty directory structure
+    install -dm755 "$pkgdir/usr/share/doc/modern-cli-meta"
+    
+    # Install documentation
+    cat > "$pkgdir/usr/share/doc/modern-cli-meta/README.md" << 'EOF'
+# Modern CLI Tools Meta Package
+
+This meta package installs all modern CLI tool packages.
+
+## Installed Packages
+
+- **modern-cli-core**: Essential tools (fish, helix, yazi, zellij)
+- **modern-cli-system**: System monitoring (procs, dust, bottom)
+- **modern-cli-git**: Git tools (gitui, lazygit)
+- **modern-cli-music**: Music tools (cmus, mpv, yt-dlp)
+- **modern-cli-productivity**: Task management (taskwarrior, calcurse)
+- **modern-cli-communication**: Email/RSS (aerc, newsboat)
+- **modern-cli-network**: Network tools (dog, xh, bandwhich)
+- **modern-cli-development**: Development tools (language servers)
+
+## Usage
+
+```bash
+# Configure all installed tools
+modern-cli install
+
+# Check installation status
+modern-cli status
+
+# List available configurations
+modern-cli list
+```
+
+## Individual Installation
+
+You can install packages individually:
+
+```bash
+# Core tools only
+sudo pacman -S modern-cli-core
+
+# Core + system monitoring
+sudo pacman -S modern-cli-core modern-cli-system
+
+# Core + git tools
+sudo pacman -S modern-cli-core modern-cli-git
+```
+EOF
+}

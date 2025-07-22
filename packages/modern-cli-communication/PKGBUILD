@@ -1,0 +1,48 @@
+# Modern CLI Communication Package
+# PKGBUILD-communication
+
+pkgname=modern-cli-communication
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="Email, RSS, and communication tools for modern CLI"
+arch=('any')
+url="https://yourusername.github.io/modern-cli-repo"
+license=('MIT')
+
+depends=(
+    'modern-cli-core'
+    
+    # Email clients
+    'aerc'
+    'neomutt'
+    
+    # Email utilities
+    'isync'
+    'msmtp'
+    'notmuch'
+    
+    # RSS and news
+    'newsboat'
+    
+    # Web browsing
+    'w3m'
+    'lynx'
+)
+
+source=(
+    "aerc-config.conf"
+    "neomutt-config.neomuttrc"
+    "newsboat-config"
+    "w3m-config"
+)
+
+md5sums=('SKIP' 'SKIP' 'SKIP' 'SKIP')
+
+package() {
+    # Install communication configs
+    install -dm755 "$pkgdir/usr/lib/modern-cli/configs"
+    install -Dm644 "$srcdir/aerc-config.conf" "$pkgdir/usr/lib/modern-cli/configs/aerc-config.conf"
+    install -Dm644 "$srcdir/neomutt-config.neomuttrc" "$pkgdir/usr/lib/modern-cli/configs/neomutt-config.neomuttrc"
+    install -Dm644 "$srcdir/newsboat-config" "$pkgdir/usr/lib/modern-cli/configs/newsboat-config"
+    install -Dm644 "$srcdir/w3m-config" "$pkgdir/usr/lib/modern-cli/configs/w3m-config"
+}

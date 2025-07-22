@@ -1,0 +1,174 @@
+name: Deploy to GitHub Pages
+
+on:
+  workflow_run:
+    workflows: ["Build Packages"]
+    types:
+      - completed
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      artifact_name:
+        description: 'Artifact name to deploy (default: latest from main)'
+        required: false
+        type: string
+
+# Sets permissions for GitHub Pages deployment
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    # Only deploy if build was successful and on main branch
+    if: github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch'
+    
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        # Use specific artifact or latest from main
+        name: ${{ github.event.inputs.artifact_name || format('arch-packages-{0}', github.event.workflow_run.head_sha) }}
+        path: x86_64/
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        repository: ${{ github.repository }}
+        run-id: ${{ github.event.workflow_run.id }}
+    
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+    
+    - name: Prepare deployment files
+      run: |
+        # Create deployment directory
+        mkdir -p _site
+        
+        # Copy repository files
+        cp -r x86_64/ _site/
+        
+        # Copy documentation
+        cp docs/index.html _site/
+        cp docs/*.md _site/ 2>/dev/null || true
+        cp README.md _site/ 2>/dev/null || true
+        
+        # Create package index JSON
+        echo "Creating package index..."
+        cat > _site/packages.json << 'EOF'
+        {
+          "repository": "modern-cli-repo",
+          "arch": "x86_64",
+          "last_updated": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+          "packages": [
+        EOF
+        
+        # Add package information
+        for pkg in x86_64/*.pkg.tar.zst; do
+          if [ -f "$pkg" ]; then
+            basename=$(basename "$pkg")
+            size=$(stat -c%s "$pkg" 2>/dev/null || echo "0")
+            name=$(echo "$basename" | sed 's/-[0-9].*//')
+            echo "    {" >> _site/packages.json
+            echo "      \"filename\": \"$basename\"," >> _site/packages.json
+            echo "      \"name\": \"$name\"," >> _site/packages.json
+            echo "      \"size\": $size" >> _site/packages.json
+            echo "    }," >> _site/packages.json
+          fi
+        done
+        
+        # Remove trailing comma and close JSON
+        sed -i '$ s/,$//' _site/packages.json
+        echo "  ]" >> _site/packages.json
+        echo "}" >> _site/packages.json
+        
+        # Create repository info
+        cat > _site/repo-info.json << EOF
+        {
+          "name": "modern-cli-repo",
+          "description": "Modern CLI tools for Arch Linux",
+          "url": "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}",
+          "packages_count": $(ls x86_64/*.pkg.tar.zst 2>/dev/null | wc -l),
+          "last_build": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+          "commit": "${{ github.event.workflow_run.head_sha || github.sha }}",
+          "branch": "${{ github.event.workflow_run.head_branch || github.ref_name }}"
+        }
+        EOF
+        
+        # Create simple package list for pacman
+        ls x86_64/*.pkg.tar.zst 2>/dev/null | xargs -n1 basename > _site/package-list.txt || true
+        
+        echo "Deployment structure:"
+        find _site -type f | head -20
+    
+    - name: Verify repository files
+      run: |
+        echo "🔍 Verifying repository files..."
+        
+        # Check database files exist
+        if [ ! -f "_site/x86_64/modern-cli-repo.db" ]; then
+          echo "❌ Repository database missing!"
+          exit 1
+        fi
+        
+        if [ ! -f "_site/x86_64/modern-cli-repo.files" ]; then
+          echo "❌ Repository files database missing!"
+          exit 1
+        fi
+        
+        # Check we have packages
+        pkg_count=$(ls _site/x86_64/*.pkg.tar.zst 2>/dev/null | wc -l)
+        if [ "$pkg_count" -eq 0 ]; then
+          echo "❌ No packages found!"
+          exit 1
+        fi
+        
+        echo "✅ Repository verification passed"
+        echo "📦 Found $pkg_count packages"
+        echo "📋 Database files present"
+    
+    - name: Upload Pages artifact
+      uses: actions/upload-pages-artifact@v3
+    
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
+    
+    - name: Deployment success
+      run: |
+        echo "🚀 Repository deployed successfully!"
+        echo "📍 URL: ${{ steps.deployment.outputs.page_url }}"
+        echo "📦 Packages available at: ${{ steps.deployment.outputs.page_url }}x86_64/"
+        
+        # Create deployment summary
+        cat > deployment-summary.md << EOF
+        # Deployment Summary
+        
+        - **Status:** ✅ Success
+        - **URL:** ${{ steps.deployment.outputs.page_url }}
+        - **Commit:** ${{ github.event.workflow_run.head_sha || github.sha }}
+        - **Packages:** $(ls _site/x86_64/*.pkg.tar.zst 2>/dev/null | wc -l)
+        - **Deployed:** $(date -u +%Y-%m-%d\ %H:%M:%S\ UTC)
+        
+        ## Quick Start
+        \`\`\`bash
+        # Add to /etc/pacman.conf
+        [modern-cli-repo]
+        Server = ${{ steps.deployment.outputs.page_url }}x86_64
+        
+        # Install
+        sudo pacman -Sy modern-cli-meta
+        \`\`\`
+        EOF

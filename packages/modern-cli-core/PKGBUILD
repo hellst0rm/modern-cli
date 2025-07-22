@@ -1,0 +1,91 @@
+# Modern CLI Core Package
+# PKGBUILD-core
+
+pkgname=modern-cli-core
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="Core modern CLI tools and configurations"
+arch=('any')
+url="https://yourusername.github.io/modern-cli-repo"
+license=('MIT')
+provides=('modern-cli-base')
+
+depends=(
+    # Essential shell and editors
+    'fish'
+    'helix'
+    'neovim'
+    
+    # File management
+    'yazi'
+    'bat'
+    'fd'
+    'ripgrep'
+    'eza'
+    'zoxide'
+    
+    # Terminal enhancement
+    'zellij'
+    'starship'
+    'fzf'
+    'mcfly'
+    
+    # Text processing
+    'sd'
+    'choose'
+    'jq'
+    
+    # Git essentials
+    'git-delta'
+    'gitui'
+    
+    # Documentation
+    'tealdeer'
+    
+    # Essential fonts
+    'ttf-firacode-nerd'
+)
+
+source=(
+    "modern-cli"
+    "zellij-config.kdl"
+    "starship-config.toml"
+    "neovim-init.lua"
+    "helix-config.toml"
+    "helix-languages.toml"
+    "yazi-config.toml"
+    "yazi-keymap.toml"
+    "bat-config"
+    "fish-config.fish"
+    "gitconfig"
+    "fzf-config.bash"
+    "mcfly-config.yml"
+    "tealdeer-config.toml"
+    "ripgrep-config"
+)
+
+md5sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+
+package() {
+    # Install the main tool
+    install -Dm755 "$srcdir/modern-cli" "$pkgdir/usr/bin/modern-cli"
+    
+    # Create lib directory for configs
+    install -dm755 "$pkgdir/usr/lib/modern-cli/configs"
+    
+    # Install core configuration files
+    install -Dm644 "$srcdir/zellij-config.kdl" "$pkgdir/usr/lib/modern-cli/configs/zellij-config.kdl"
+    install -Dm644 "$srcdir/starship-config.toml" "$pkgdir/usr/lib/modern-cli/configs/starship-config.toml"
+    install -Dm644 "$srcdir/neovim-init.lua" "$pkgdir/usr/lib/modern-cli/configs/neovim-init.lua"
+    install -Dm644 "$srcdir/helix-config.toml" "$pkgdir/usr/lib/modern-cli/configs/helix-config.toml"
+    install -Dm644 "$srcdir/helix-languages.toml" "$pkgdir/usr/lib/modern-cli/configs/helix-languages.toml"
+    install -Dm644 "$srcdir/yazi-config.toml" "$pkgdir/usr/lib/modern-cli/configs/yazi-config.toml"
+    install -Dm644 "$srcdir/yazi-keymap.toml" "$pkgdir/usr/lib/modern-cli/configs/yazi-keymap.toml"
+    install -Dm644 "$srcdir/bat-config" "$pkgdir/usr/lib/modern-cli/configs/bat-config"
+    install -Dm644 "$srcdir/fish-config.fish" "$pkgdir/usr/lib/modern-cli/configs/fish-config.fish"
+    install -Dm644 "$srcdir/gitconfig" "$pkgdir/usr/lib/modern-cli/configs/gitconfig"
+    install -Dm644 "$srcdir/fzf-config.bash" "$pkgdir/usr/lib/modern-cli/configs/fzf-config.bash"
+    install -Dm644 "$srcdir/mcfly-config.yml" "$pkgdir/usr/lib/modern-cli/configs/mcfly-config.yml"
+    install -Dm644 "$srcdir/tealdeer-config.toml" "$pkgdir/usr/lib/modern-cli/configs/tealdeer-config.toml"
+    install -Dm644 "$srcdir/ripgrep-config" "$pkgdir/usr/lib/modern-cli/configs/ripgrep-config"
+}

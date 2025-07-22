@@ -1,0 +1,75 @@
+# Curl Configuration
+# ~/.config/curl/config
+
+# User agent
+user-agent = "curl/modern-cli"
+
+# Timeouts
+connect-timeout = 30
+max-time = 300
+
+# Redirects
+location = true
+max-redirs = 10
+
+# SSL/TLS
+ssl-reqd = false
+sslv2 = false
+sslv3 = false
+tlsv1.0 = false
+tlsv1.1 = false
+tlsv1.2 = true
+tlsv1.3 = true
+
+# Certificate verification
+capath = /etc/ssl/certs/
+cacert = /etc/ssl/certs/ca-certificates.crt
+
+# Progress and output
+progress-bar = true
+show-error = true
+fail = true
+silent = false
+
+# HTTP settings
+http2 = true
+compressed = true
+
+# Headers
+header = "Accept: */*"
+header = "Accept-Encoding: gzip, deflate, br"
+header = "Accept-Language: en-US,en;q=0.9"
+
+# Cookies
+cookie-jar = ~/.config/curl/cookies.txt
+junk-session-cookies = true
+
+# Proxy settings (uncomment and configure as needed)
+# proxy = http://proxy.example.com:8080
+# proxy-user = username:password
+# noproxy = localhost,127.0.0.1,::1
+
+# Authentication (use with caution, prefer netrc)
+# user = username:password
+
+# Output options
+remote-time = true
+write-out = "     time_namelookup:  %{time_namelookup}\\n        time_connect:  %{time_connect}\\n     time_appconnect:  %{time_appconnect}\\n    time_pretransfer:  %{time_pretransfer}\\n       time_redirect:  %{time_redirect}\\n  time_starttransfer:  %{time_starttransfer}\\n                     ----------\\n          time_total:  %{time_total}\\n"
+
+# IPv4/IPv6 preferences
+ipv4 = false
+ipv6 = false
+
+# Retry settings
+retry = 3
+retry-delay = 2
+retry-max-time = 60
+
+# Rate limiting
+limit-rate = 0
+
+# DNS settings
+dns-servers = 1.1.1.1,1.0.0.1,8.8.8.8,8.8.4.4
+
+# Security
+proto-redir = =http,https,ftp,ftps

@@ -1,0 +1,36 @@
+# Modern CLI Git Package
+# PKGBUILD-git
+
+pkgname=modern-cli-git
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="Advanced Git tools and configurations for modern CLI"
+arch=('any')
+url="https://yourusername.github.io/modern-cli-repo"
+license=('MIT')
+
+depends=(
+    'modern-cli-core'
+    
+    # Advanced Git tools
+    'lazygit'
+    'git-interactive-rebase-tool'
+    
+    # Git utilities
+    'git-lfs'
+    'github-cli'
+)
+
+source=(
+    "gitui-theme.ron"
+    "lazygit-config.yml"
+)
+
+md5sums=('SKIP' 'SKIP')
+
+package() {
+    # Install Git tool configs
+    install -dm755 "$pkgdir/usr/lib/modern-cli/configs"
+    install -Dm644 "$srcdir/gitui-theme.ron" "$pkgdir/usr/lib/modern-cli/configs/gitui-theme.ron"
+    install -Dm644 "$srcdir/lazygit-config.yml" "$pkgdir/usr/lib/modern-cli/configs/lazygit-config.yml"
+}

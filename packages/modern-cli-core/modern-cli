@@ -1,0 +1,206 @@
+#!/usr/bin/env bash
+# Modern CLI Tools Configuration Manager (Package-Aware)
+# modern-cli
+
+set -euo pipefail
+
+CONFIG_DIR="/usr/lib/modern-cli/configs"
+BACKUP_DIR="$HOME/.config-backup-$(date +%Y%m%d-%H%M%S)"
+VERSION="1.0.0"
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+PURPLE='\033[0;35m'
+CYAN='\033[0;36m'
+NC='\033[0m' # No Color
+
+print_status() {
+    echo -e "${BLUE}[INFO]${NC} $1"
+}
+
+print_success() {
+    echo -e "${GREEN}[SUCCESS]${NC} $1"
+}
+
+print_warning() {
+    echo -e "${YELLOW}[WARNING]${NC} $1"
+}
+
+print_error() {
+    echo -e "${RED}[ERROR]${NC} $1"
+}
+
+print_header() {
+    echo -e "${PURPLE}"
+    echo "  ███╗   ███╗ ██████╗ ██████╗ ███████╗██████╗ ███╗   ██╗     ██████╗██╗     ██╗"
+    echo "  ████╗ ████║██╔═══██╗██╔══██╗██╔════╝██╔══██╗████╗  ██║    ██╔════╝██║     ██║"
+    echo "  ██╔████╔██║██║   ██║██║  ██║█████╗  ██████╔╝██╔██╗ ██║    ██║     ██║     ██║"
+    echo "  ██║╚██╔╝██║██║   ██║██║  ██║██╔══╝  ██╔══██╗██║╚██╗██║    ██║     ██║     ██║"
+    echo "  ██║ ╚═╝ ██║╚██████╔╝██████╔╝███████╗██║  ██║██║ ╚████║    ╚██████╗███████╗██║"
+    echo "  ╚═╝     ╚═╝ ╚═════╝ ╚═════╝ ╚══════╝╚═╝  ╚═╝╚═╝  ╚═══╝     ╚═════╝╚══════╝╚═╝"
+    echo -e "${NC}"
+    echo -e "${CYAN}                     Modern CLI Tools Configuration Manager v$VERSION${NC}"
+    echo
+}
+
+# Detect installed packages
+get_installed_packages() {
+    local packages=()
+    
+    # Check which modern-cli packages are installed
+    if pacman -Qi modern-cli-core &>/dev/null; then
+        packages+=("core")
+    fi
+    if pacman -Qi modern-cli-system &>/dev/null; then
+        packages+=("system")
+    fi
+    if pacman -Qi modern-cli-git &>/dev/null; then
+        packages+=("git")
+    fi
+    if pacman -Qi modern-cli-music &>/dev/null; then
+        packages+=("music")
+    fi
+    if pacman -Qi modern-cli-productivity &>/dev/null; then
+        packages+=("productivity")
+    fi
+    if pacman -Qi modern-cli-communication &>/dev/null; then
+        packages+=("communication")
+    fi
+    if pacman -Qi modern-cli-network &>/dev/null; then
+        packages+=("network")
+    fi
+    if pacman -Qi modern-cli-development &>/dev/null; then
+        packages+=("development")
+    fi
+    
+    printf '%s\n' "${packages[@]}"
+}
+
+# Get available configs based on installed packages
+get_available_configs() {
+    local installed_packages=($(get_installed_packages))
+    local configs=()
+    
+    # Core configs (always available if core is installed)
+    if [[ " ${installed_packages[*]} " =~ " core " ]]; then
+        configs+=(
+            "zellij-config.kdl:~/.config/zellij/config.kdl:Terminal multiplexer"
+            "starship-config.toml:~/.config/starship.toml:Shell prompt"
+            "neovim-init.lua:~/.config/nvim/init.lua:Text editor"
+            "helix-config.toml:~/.config/helix/config.toml:Modal editor"
+            "helix-languages.toml:~/.config/helix/languages.toml:Language servers"
+            "yazi-config.toml:~/.config/yazi/yazi.toml:File manager"
+            "yazi-keymap.toml:~/.config/yazi/keymap.toml:File manager keybindings"
+            "fish-config.fish:~/.config/fish/config.fish:Shell configuration"
+            "gitconfig:~/.gitconfig:Git configuration"
+            "bat-config:~/.config/bat/config:Syntax highlighter"
+            "fzf-config.bash:~/.config/fzf/fzf.bash:Fuzzy finder"
+            "mcfly-config.yml:~/.config/mcfly/config.yml:History search"
+            "tealdeer-config.toml:~/.config/tealdeer/config.toml:TLDR client"
+        )
+    fi
+    
+    # System monitoring configs
+    if [[ " ${installed_packages[*]} " =~ " system " ]]; then
+        configs+=(
+            "bottom-config.toml:~/.config/bottom/bottom.toml:System monitor"
+        )
+    fi
+    
+    # Git tool configs
+    if [[ " ${installed_packages[*]} " =~ " git " ]]; then
+        configs+=(
+            "gitui-theme.ron:~/.config/gitui/theme.ron:Git TUI theme"
+            "lazygit-config.yml:~/.config/lazygit/config.yml:LazyGit configuration"
+        )
+    fi
+    
+    # Music configs
+    if [[ " ${installed_packages[*]} " =~ " music " ]]; then
+        configs+=(
+            "cmus-config.rc:~/.config/cmus/rc:Music player"
+            "ncmpcpp-config:~/.config/ncmpcpp/config:NCurses music player"
+            "mpd-config.conf:~/.config/mpd/mpd.conf:Music daemon"
+        )
+    fi
+    
+    # Productivity configs
+    if [[ " ${installed_packages[*]} " =~ " productivity " ]]; then
+        configs+=(
+            "taskwarrior-config.taskrc:~/.taskrc:Task management"
+            "calcurse-config:~/.config/calcurse/conf:Calendar application"
+            "vit-config.ini:~/.config/vit/config.ini:Visual task management"
+        )
+    fi
+    
+    # Communication configs
+    if [[ " ${installed_packages[*]} " =~ " communication " ]]; then
+        configs+=(
+            "aerc-config.conf:~/.config/aerc/aerc.conf:Email client"
+            "neomutt-config.neomuttrc:~/.config/neomutt/neomuttrc:Email client"
+            "newsboat-config:~/.config/newsboat/config:RSS reader"
+            "w3m-config:~/.config/w3m/config:Web browser"
+        )
+    fi
+    
+    # Network configs
+    if [[ " ${installed_packages[*]} " =~ " network " ]]; then
+        configs+=(
+            "xh-config.toml:~/.config/xh/config.toml:HTTP client"
+            "curl-config:~/.config/curl/config:HTTP client"
+        )
+    fi
+    
+    # Development configs
+    if [[ " ${installed_packages[*]} " =~ " development " ]]; then
+        configs+=(
+            "helix-development.toml:~/.config/helix/development.toml:Development LSP config"
+            "just-config.toml:~/.config/just/config.toml:Command runner"
+        )
+    fi
+    
+    printf '%s\n' "${configs[@]}"
+}
+
+show_help() {
+    cat << EOF
+Usage: modern-cli [COMMAND] [OPTIONS]
+
+Commands:
+  install     Install configurations for installed packages
+  packages    Show installed modern-cli packages
+  list        List available configurations
+  status      Show installation status
+  backup      Create backup of current configurations
+  version     Show version information
+  help        Show this help message
+
+Options:
+  -f, --force    Force operation without prompting
+  -v, --verbose  Verbose output
+  -h, --help     Show help for specific command
+
+Examples:
+  modern-cli install           # Install all available configurations
+  modern-cli packages          # Show which packages are installed
+  modern-cli list              # Show available configs for installed packages
+  modern-cli status            # Check installation status
+
+Package-aware installation: Only configurations for installed packages will be applied.
+
+EOF
+}
+
+show_packages() {
+    print_header
+    print_status "Installed Modern CLI packages:"
+    echo
+    
+    local installed_packages=($(get_installed_packages))
+    
+    if [[ ${#installed_packages[@]} -eq 0 ]]; then
+        print_warning "No modern-cli packages found!"
+        print_status "Install packages with: sudo pacman -S modern-cli-core
