@@ -14,6 +14,24 @@ on:
   workflow_dispatch:
 
 jobs:
+  test-pkgbuilds:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Arch Linux environment
+      run: |
+        pacman -Syu --noconfirm
+        pacman -S --noconfirm base-devel namcap
+    
+    - name: Test PKGBUILD syntax
+      run: |
+        ./scripts/test-pkgbuild.sh all
+
   test-configs:
     runs-on: ubuntu-latest
     container:
@@ -42,7 +60,7 @@ jobs:
         ./scripts/test-configs.sh all
 
   build-packages:
-    needs: test-configs
+    needs: [test-pkgbuilds, test-configs]
     runs-on: ubuntu-latest
     container:
       image: archlinux:latest
@@ -54,7 +72,7 @@ jobs:
     - name: Setup Arch Linux environment
       run: |
         pacman -Syu --noconfirm
-        pacman -S --noconfirm base-devel git sudo
+        pacman -S --noconfirm base-devel devtools git sudo
     
     - name: Create build user
       run: |
@@ -62,17 +80,25 @@ jobs:
         echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
         chown -R builder:builder .
     
+    - name: Show build order and dependencies
+      run: |
+        su builder -c "./scripts/update-packages.sh deps"
+    
     - name: Build all packages
       run: |
         su builder -c "./scripts/update-packages.sh build"
     
-    - name: List built packages
+    - name: Update repository database
       run: |
-        echo "Built packages:"
-        ls -la x86_64/
-        
-        echo "Repository database:"
-        ls -la x86_64/modern-cli-repo.*
+        su builder -c "./scripts/build-repo.sh add"
+    
+    - name: Verify repository integrity
+      run: |
+        ./scripts/build-repo.sh verify
+    
+    - name: Show repository status
+      run: |
+        ./scripts/build-repo.sh status
     
     - name: Upload packages artifact
       uses: actions/upload-artifact@v4
@@ -81,21 +107,38 @@ jobs:
         path: x86_64/
         retention-days: 30
     
-    - name: Upload build summary
+    - name: Generate build summary
       run: |
         echo "## Build Summary" > build-summary.md
         echo "- **Commit:** ${{ github.sha }}" >> build-summary.md
         echo "- **Branch:** ${{ github.ref_name }}" >> build-summary.md
-        echo "- **Built packages:**" >> build-summary.md
-        for pkg in x86_64/*.pkg.tar.zst; do
-          if [ -f "$pkg" ]; then
-            echo "  - $(basename "$pkg")" >> build-summary.md
-          fi
-        done
+        echo "- **Build Method:** pkgctl with dependency resolution" >> build-summary.md
+        echo "" >> build-summary.md
         
-        echo "- **Repository files:**" >> build-summary.md
-        echo "  - modern-cli-repo.db: $(ls -lh x86_64/modern-cli-repo.db | awk '{print $5}')" >> build-summary.md
-        echo "  - modern-cli-repo.files: $(ls -lh x86_64/modern-cli-repo.files | awk '{print $5}')" >> build-summary.md
+        echo "### Built Packages" >> build-summary.md
+        if ls x86_64/*.pkg.tar.* 1> /dev/null 2>&1; then
+          for pkg in x86_64/*.pkg.tar.*; do
+            if [ -f "$pkg" ]; then
+              pkg_name=$(basename "$pkg")
+              pkg_size=$(stat -c%s "$pkg" | numfmt --to=iec)
+              echo "- $pkg_name ($pkg_size)" >> build-summary.md
+            fi
+          done
+        else
+          echo "- No packages found" >> build-summary.md
+        fi
+        
+        echo "" >> build-summary.md
+        echo "### Repository Database" >> build-summary.md
+        if [ -f "x86_64/modern-cli-repo.db" ]; then
+          db_size=$(ls -lh x86_64/modern-cli-repo.db | awk '{print $5}')
+          files_size=$(ls -lh x86_64/modern-cli-repo.files | awk '{print $5}')
+          echo "- Database: modern-cli-repo.db ($db_size)" >> build-summary.md
+          echo "- Files: modern-cli-repo.files ($files_size)" >> build-summary.md
+          echo "- Format: Modern .tar.xz format with symlinks" >> build-summary.md
+        else
+          echo "- Repository database not found" >> build-summary.md
+        fi
     
     - name: Upload build summary
       uses: actions/upload-artifact@v4
@@ -105,7 +148,7 @@ jobs:
         retention-days: 30
 
   build-status:
-    needs: [test-configs, build-packages]
+    needs: [test-pkgbuilds, test-configs, build-packages]
     runs-on: ubuntu-latest
     if: always()
     
@@ -115,9 +158,16 @@ jobs:
       run: |
         echo "✅ All packages built successfully!"
         echo "📦 Artifacts available for deployment"
+        echo "🔧 Built with pkgctl and dependency resolution"
     
     - name: Build failure notification
       if: needs.build-packages.result == 'failure'
       run: |
         echo "❌ Package build failed!"
         echo "🔍 Check build logs for details"
+        
+    - name: Test failure notification
+      if: needs.test-pkgbuilds.result == 'failure' || needs.test-configs.result == 'failure'
+      run: |
+        echo "❌ Pre-build tests failed!"
+        echo "🔍 Check test logs for details"
