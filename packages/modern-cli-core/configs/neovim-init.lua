@@ -20,34 +20,34 @@ vim.opt.mouse = "a"
 vim.g.mapleader = " "
 
 -- Basic keymaps
-vim.keymap.set("n", "<leader>e", ":!yazi<CR>", { desc = "Open Yazi file manager" })
+vim.keymap.set("n", "<leader>e", ":terminal yazi<CR>", { desc = "Open Yazi file manager" })
 vim.keymap.set("n", "<leader>t", ":terminal<CR>", { desc = "Open terminal" })
-vim.keymap.set("n", "<leader>gg", ":!gitui<CR>", { desc = "Open GitUI" })
-vim.keymap.set("n", "<leader>lg", ":!lazygit<CR>", { desc = "Open LazyGit" })
+vim.keymap.set("n", "<leader>gg", ":terminal gitui<CR>", { desc = "Open GitUI" })
+vim.keymap.set("n", "<leader>lg", ":terminal lazygit<CR>", { desc = "Open LazyGit" })
 
 -- File navigation with modern tools
-vim.keymap.set("n", "<leader>ff", ":!fd . | fzf<CR>", { desc = "FZF file finder" })
-vim.keymap.set("n", "<leader>fg", ":!rg . | fzf<CR>", { desc = "FZF grep" })
-vim.keymap.set("n", "<leader>fb", ":!git branch | fzf<CR>", { desc = "FZF git branches" })
+vim.keymap.set("n", "<leader>ff", ":terminal fd . | fzf<CR>", { desc = "FZF file finder" })
+vim.keymap.set("n", "<leader>fg", ":terminal rg . | fzf<CR>", { desc = "FZF grep" })
+vim.keymap.set("n", "<leader>fb", ":terminal git branch | fzf<CR>", { desc = "FZF git branches" })
 
 -- System monitoring shortcuts
-vim.keymap.set("n", "<leader>sm", ":!btm<CR>", { desc = "System monitor" })
-vim.keymap.set("n", "<leader>sp", ":!procs<CR>", { desc = "Process viewer" })
+vim.keymap.set("n", "<leader>sm", ":terminal btm<CR>", { desc = "System monitor" })
+vim.keymap.set("n", "<leader>sp", ":terminal procs<CR>", { desc = "Process viewer" })
 
 -- Terminal integration
 vim.keymap.set("n", "<leader>tt", ":terminal<CR>", { desc = "Open terminal" })
-vim.keymap.set("n", "<leader>tz", ":!zellij<CR>", { desc = "Open zellij" })
+vim.keymap.set("n", "<leader>tz", ":terminal zellij<CR>", { desc = "Open zellij" })
 
 -- File managers
-vim.keymap.set("n", "<leader>br", ":!broot<CR>", { desc = "Open broot" })
+vim.keymap.set("n", "<leader>br", ":terminal broot<CR>", { desc = "Open broot" })
 
 -- Yazi integration with directory change
 vim.keymap.set("n", "<leader>f", function()
   local current_file = vim.fn.expand("%:p")
   if current_file ~= "" then
-    vim.cmd("!yazi " .. vim.fn.shellescape(vim.fn.expand("%:p:h")))
+    vim.cmd("terminal yazi " .. vim.fn.shellescape(vim.fn.expand("%:p:h")))
   else
-    vim.cmd("!yazi")
+    vim.cmd("terminal yazi")
   end
 end, { desc = "Open Yazi in current directory" })
 
@@ -109,7 +109,11 @@ autocmd("TextYankPost", {
 -- Remove whitespace on save
 autocmd("BufWritePre", {
   pattern = "*",
-  command = ":%s/\\s\\+$//e",
+  callback = function()
+    local save_cursor = vim.fn.getpos(".")
+    pcall(function() vim.cmd([[%s/\s\+$//e]]) end)
+    vim.fn.setpos(".", save_cursor)
+  end,
 })
 
 -- Basic colorscheme (fallback)

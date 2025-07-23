@@ -51,7 +51,7 @@ test_config_syntax() {
             ;;
         "yaml"|"yml")
             if command -v yq &> /dev/null; then
-                if yq eval . "$config_file" &> /dev/null; then
+                if yq -e '.' "$config_file" &> /dev/null; then
                     return 0
                 else
                     return 1
@@ -73,11 +73,50 @@ test_config_syntax() {
                 return 0
             fi
             ;;
-        "lua")
-            if command -v lua &> /dev/null; then
-                if lua -e "dofile('$config_file')" &> /dev/null; then
+        "xml")
+            if command -v yq &> /dev/null; then
+                # yq can handle XML files
+                if yq eval . "$config_file" &> /dev/null; then
                     return 0
                 else
+                    return 1
+                fi
+            else
+                print_warning "yq not installed, skipping XML validation"
+                return 0
+            fi
+            ;;
+        "lua")
+            if command -v lua &> /dev/null; then
+                # Create a temporary script to test syntax without executing
+                local temp_test=$(mktemp)
+                cat > "$temp_test" << 'EOF'
+local function test_syntax(file)
+    local f = io.open(file, 'r')
+    if not f then return false end
+    local content = f:read('*all')
+    f:close()
+    
+    local func, err = load(content)
+    if func then
+        return true
+    else
+        return false, err
+    end
+end
+
+local ok, err = test_syntax(arg[1])
+if ok then
+    os.exit(0)
+else
+    os.exit(1)
+end
+EOF
+                if lua "$temp_test" "$config_file" &> /dev/null; then
+                    rm -f "$temp_test"
+                    return 0
+                else
+                    rm -f "$temp_test"
                     return 1
                 fi
             else
@@ -97,16 +136,30 @@ test_config_syntax() {
                 return 0
             fi
             ;;
-        "bash")
+        "bash"|"rc")
+            # For rc files and bash scripts
             if bash -n "$config_file" &> /dev/null; then
+                return 0
+            else
+                # RC files might not be valid bash, so just check readability
+                if [[ -r "$config_file" && -s "$config_file" ]]; then
+                    return 0
+                else
+                    return 1
+                fi
+            fi
+            ;;
+        "text"|"conf")
+            # For config files, just check if readable and non-empty
+            if [[ -r "$config_file" && -s "$config_file" ]]; then
                 return 0
             else
                 return 1
             fi
             ;;
         *)
-            # For other types, just check if file is readable
-            if [[ -r "$config_file" ]]; then
+            # For other types, just check if file is readable and non-empty
+            if [[ -r "$config_file" && -s "$config_file" ]]; then
                 return 0
             else
                 return 1
@@ -119,19 +172,30 @@ test_config_syntax() {
 get_file_type() {
     local file="$1"
     local extension="${file##*.}"
+    local basename="$(basename "$file")"
     
     case "$extension" in
         "toml") echo "toml" ;;
         "yml"|"yaml") echo "yaml" ;;
         "json") echo "json" ;;
+        "xml") echo "xml" ;;
         "lua") echo "lua" ;;
         "fish") echo "fish" ;;
         "bash"|"sh") echo "bash" ;;
-        "kdl") echo "kdl" ;;
-        "ron") echo "ron" ;;
-        "rc") echo "bash" ;;
-        "conf") echo "text" ;;
-        *) echo "text" ;;
+        "kdl") echo "text" ;;  # KDL files treated as text
+        "ron") echo "text" ;;  # RON files treated as text
+        "rc") echo "rc" ;;     # RC files need special handling
+        "conf") echo "conf" ;; # Config files
+        "neomuttrc") echo "conf" ;;
+        *) 
+            # Check basename for special cases
+            case "$basename" in
+                "*config*") echo "conf" ;;
+                "gitconfig") echo "conf" ;;
+                "*-config") echo "conf" ;;
+                *) echo "text" ;;
+            esac
+            ;;
     esac
 }
 

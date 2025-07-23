@@ -26,7 +26,16 @@ jobs:
     - name: Setup Arch Linux environment
       run: |
         pacman -Syu --noconfirm
-        pacman -S --noconfirm base-devel git
+        pacman -S --noconfirm base-devel git fish lua jq yq taplo-cli
+
+    - name: Verify tools installation
+      run: |
+        echo "Verifying installed tools..."
+        jq --version || echo "jq not found"
+        yq --version || echo "yq not found" 
+        taplo --version || echo "taplo not found"
+        lua -v || echo "lua not found"
+        fish --version || echo "fish not found"
     
     - name: Test configurations
       run: |
