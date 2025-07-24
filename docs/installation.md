@@ -16,7 +16,7 @@ Add the following at the end of the file:
 
 ```ini
 [modern-cli-repo]
-Server = https://yourusername.github.io/modern-cli-repo/$arch
+Server = https://hellst0rm.github.io/modern-cli/$arch
 ```
 
 ### 2. Update Package Database
@@ -378,7 +378,7 @@ modern-cli install
 ### Repository Access Issues
 ```bash
 # Test repository access
-curl -I https://yourusername.github.io/modern-cli-repo/x86_64/modern-cli-repo.db
+curl -I https://hellst0rm.github.io/modern-cli/x86_64/modern-cli-repo.db
 
 # Refresh package database
 sudo pacman -Syy
@@ -447,7 +447,7 @@ rm ~/.gitconfig
 ```bash
 # Edit /etc/pacman.conf and remove:
 [modern-cli-repo]
-Server = https://yourusername.github.io/modern-cli-repo/$arch
+Server = https://hellst0rm.github.io/modern-cli/$arch
 
 # Refresh database
 sudo pacman -Sy

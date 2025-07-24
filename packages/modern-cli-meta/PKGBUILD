@@ -1,12 +1,10 @@
-# Modern CLI Meta Package (All-in-One)
-# PKGBUILD-meta
-
+# Maintainer: Roger Navelsaker <roger.navelsaker@gmail.com>
 pkgname=modern-cli-meta
 pkgver=1.0.0
 pkgrel=1
 pkgdesc="Meta package for all modern CLI tools and configurations"
 arch=('any')
-url="https://yourusername.github.io/modern-cli-repo"
+url="https://hellst0rm.github.io/modern-cli"
 license=('MIT')
 
 depends=(

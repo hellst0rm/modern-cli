@@ -1,12 +1,10 @@
-# Modern CLI Music Package
-# PKGBUILD-music
-
+# Maintainer: Roger Navelsaker <roger.navelsaker@gmail.com>
 pkgname=modern-cli-music
 pkgver=1.0.0
 pkgrel=1
 pkgdesc="Music and media tools for modern CLI"
 arch=('any')
-url="https://yourusername.github.io/modern-cli-repo"
+url="https://hellst0rm.github.io/modern-cli"
 license=('MIT')
 
 depends=(

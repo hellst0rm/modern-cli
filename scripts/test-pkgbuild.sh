@@ -59,8 +59,9 @@ validate_dependencies() {
         source "$pkgbuild" 2>/dev/null
         
         # Combine all dependency types
-        all_deps+=("${depends[@]}" "${makedepends[@]}" "${checkdepends[@]}" 2>/dev/null || true)
-        
+        local all_deps=()
+        all_deps+=("${depends[@]:-}" "${makedepends[@]:-}" "${checkdepends[@]:-}")
+
         # Check each dependency
         local missing_deps=()
         local aur_deps=()

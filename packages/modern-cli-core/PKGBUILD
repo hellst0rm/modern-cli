@@ -1,12 +1,10 @@
-# Modern CLI Core Package
-# PKGBUILD-core
-
+# Maintainer: Roger Navelsaker <roger.navelsaker@gmail.com>
 pkgname=modern-cli-core
 pkgver=1.0.0
 pkgrel=1
 pkgdesc="Core modern CLI tools and configurations"
 arch=('any')
-url="https://yourusername.github.io/modern-cli-repo"
+url="https://hellst0rm.github.io/modern-cli"
 license=('MIT')
 provides=('modern-cli-base')
 

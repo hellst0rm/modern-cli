@@ -7,7 +7,7 @@ A curated collection of modern command-line tools and configurations for Arch Li
 ```bash
 # Add repository
 echo '[modern-cli-repo]
-Server = https://yourusername.github.io/modern-cli-repo/$arch' | sudo tee -a /etc/pacman.conf
+Server = https://hellst0rm.github.io/modern-cli/$arch' | sudo tee -a /etc/pacman.conf
 
 # Install and configure
 sudo pacman -Sy modern-cli-meta
