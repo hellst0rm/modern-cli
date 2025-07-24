@@ -26,11 +26,35 @@ jobs:
     - name: Setup Arch Linux environment
       run: |
         pacman -Syu --noconfirm
-        pacman -S --noconfirm base-devel namcap
+        pacman -S --noconfirm base-devel namcap git sudo fakeroot
     
-    - name: Test PKGBUILD syntax
+    - name: Create build user for AUR packages
       run: |
-        ./scripts/test-pkgbuild.sh all
+        useradd -m -G wheel aur_builder
+        echo "aur_builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+        chown -R aur_builder:aur_builder .
+    
+    - name: Install paru (AUR helper)
+      run: |
+        sudo -u aur_builder bash -c "
+          cd /tmp
+          git clone https://aur.archlinux.org/paru.git
+          cd paru
+          makepkg -si --noconfirm
+        "
+    
+    - name: Install aurutils
+      run: |
+        sudo -u aur_builder bash -c "
+          paru -S --noconfirm aurutils
+        "
+    
+    - name: Test PKGBUILD syntax with paru integration
+      run: |
+        sudo -u aur_builder bash -c "
+          cd $(pwd)
+          ./scripts/test-pkgbuild.sh all
+        "
 
   test-configs:
     runs-on: ubuntu-latest
@@ -72,7 +96,7 @@ jobs:
     - name: Setup Arch Linux environment
       run: |
         pacman -Syu --noconfirm
-        pacman -S --noconfirm base-devel devtools git sudo
+        pacman -S --noconfirm base-devel devtools git sudo fakeroot
     
     - name: Create build user
       run: |
@@ -80,17 +104,46 @@ jobs:
         echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
         chown -R builder:builder .
     
-    - name: Show build order and dependencies
+    - name: Install paru, repoctl and aurutils
       run: |
-        su builder -c "./scripts/update-packages.sh deps"
+        sudo -u builder bash -c "
+          # Install paru first
+          cd /tmp
+          git clone https://aur.archlinux.org/paru.git
+          cd paru
+          makepkg -si --noconfirm
+          
+          # Install repoctl and aurutils using paru
+          paru -S --noconfirm repoctl aurutils
+        "
     
-    - name: Build all packages
+    - name: Initialize aurutils repository
       run: |
-        su builder -c "./scripts/update-packages.sh build"
+        sudo -u builder bash -c "
+          cd $(pwd)
+          ./scripts/build-repo.sh init
+        "
     
-    - name: Update repository database
+    - name: Show build order and dependencies with enhanced tools
       run: |
-        su builder -c "./scripts/build-repo.sh add"
+        sudo -u builder bash -c "
+          cd $(pwd)
+          ./scripts/update-packages.sh deps
+        "
+    
+    - name: Build all packages with aurutils and paru
+      run: |
+        sudo -u builder bash -c "
+          cd $(pwd)
+          ./scripts/update-packages.sh build
+        "
+    
+    - name: Update repository database with aurutils integration
+      run: |
+        sudo -u builder bash -c "
+          cd $(pwd)
+          ./scripts/build-repo.sh add
+        "
     
     - name: Verify repository integrity
       run: |
@@ -112,7 +165,14 @@ jobs:
         echo "## Build Summary" > build-summary.md
         echo "- **Commit:** ${{ github.sha }}" >> build-summary.md
         echo "- **Branch:** ${{ github.ref_name }}" >> build-summary.md
-        echo "- **Build Method:** pkgctl with dependency resolution" >> build-summary.md
+        echo "- **Build Method:** Aurutils + Paru with pkgctl fallback" >> build-summary.md
+        echo "" >> build-summary.md
+        
+        echo "### Build Tools Used" >> build-summary.md
+        echo "- **Repoctl:** $(command -v repoctl >/dev/null && echo "✓ Available" || echo "✗ Not available")" >> build-summary.md
+        echo "- **Aurutils:** $(command -v aur >/dev/null && echo "✓ Available" || echo "✗ Not available")" >> build-summary.md
+        echo "- **Paru:** $(command -v paru >/dev/null && echo "✓ Available" || echo "✗ Not available")" >> build-summary.md
+        echo "- **Pkgctl:** $(command -v pkgctl >/dev/null && echo "✓ Available" || echo "✗ Not available")" >> build-summary.md
         echo "" >> build-summary.md
         
         echo "### Built Packages" >> build-summary.md
@@ -136,6 +196,7 @@ jobs:
           echo "- Database: modern-cli-repo.db ($db_size)" >> build-summary.md
           echo "- Files: modern-cli-repo.files ($files_size)" >> build-summary.md
           echo "- Format: Modern .tar.xz format with symlinks" >> build-summary.md
+          echo "- Aurutils Integration: $(test -d ~/.cache/aurutils/modern-cli && echo "✓ Initialized" || echo "✗ Not initialized")" >> build-summary.md
         else
           echo "- Repository database not found" >> build-summary.md
         fi
@@ -158,7 +219,8 @@ jobs:
       run: |
         echo "✅ All packages built successfully!"
         echo "📦 Artifacts available for deployment"
-        echo "🔧 Built with pkgctl and dependency resolution"
+        echo "🔧 Built with repoctl, aurutils, paru, and pkgctl integration"
+        echo "🎯 Enhanced dependency resolution and repository management"
     
     - name: Build failure notification
       if: needs.build-packages.result == 'failure'

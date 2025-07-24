@@ -29,6 +29,84 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
+# Check if paru is available for dependency validation
+check_paru() {
+    if command -v paru &> /dev/null; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+# Validate dependencies with paru
+validate_dependencies() {
+    local package_dir="$1"
+    local pkgbuild="$package_dir/PKGBUILD"
+    
+    if ! check_paru; then
+        print_warning "Paru not available, skipping dependency validation"
+        return 0
+    fi
+    
+    print_status "Validating dependencies with paru..."
+    
+    # Extract and check dependencies
+    local all_deps=()
+    
+    # Source PKGBUILD to get dependency arrays
+    (
+        cd "$package_dir"
+        source "$pkgbuild" 2>/dev/null
+        
+        # Combine all dependency types
+        all_deps+=("${depends[@]}" "${makedepends[@]}" "${checkdepends[@]}" 2>/dev/null || true)
+        
+        # Check each dependency
+        local missing_deps=()
+        local aur_deps=()
+        
+        for dep in "${all_deps[@]}"; do
+            [[ -z "$dep" ]] && continue
+            
+            # Remove version constraints for checking
+            dep_name=$(echo "$dep" | sed 's/[>=<].*//')
+            
+            # Skip modern-cli-* dependencies (internal)
+            if [[ "$dep_name" == modern-cli-* ]]; then
+                continue
+            fi
+            
+            print_status "Checking dependency: $dep_name"
+            
+            # Check in official repositories first
+            if pacman -Si "$dep_name" &>/dev/null; then
+                print_success "Found in official repos: $dep_name"
+            # Check in AUR with paru
+            elif paru -Si "$dep_name" &>/dev/null; then
+                aur_deps+=("$dep_name")
+                print_warning "Found in AUR: $dep_name"
+            else
+                missing_deps+=("$dep_name")
+                print_error "Not found: $dep_name"
+            fi
+        done
+        
+        # Report results
+        if [[ ${#aur_deps[@]} -gt 0 ]]; then
+            print_warning "AUR dependencies found: ${aur_deps[*]}"
+        fi
+        
+        if [[ ${#missing_deps[@]} -gt 0 ]]; then
+            print_error "Missing dependencies: ${missing_deps[*]}"
+            exit 1
+        else
+            print_success "All dependencies are available"
+        fi
+    )
+    
+    return $?
+}
+
 # Test PKGBUILD syntax and required variables
 test_pkgbuild_syntax() {
     local package_dir="$1"
@@ -81,6 +159,12 @@ test_pkgbuild_syntax() {
             source "$pkgbuild" 2>&1 || echo "Failed to source PKGBUILD"
         )
         print_error "PKGBUILD validation failed: $error_output"
+        return 1
+    fi
+    
+    # Validate dependencies with paru if available
+    if ! validate_dependencies "$package_dir"; then
+        print_error "Dependency validation failed for $package_name"
         return 1
     fi
     
@@ -144,7 +228,7 @@ main() {
             
         "help"|"--help"|"-h")
             cat << EOF
-PKGBUILD Testing Script
+PKGBUILD Testing Script with Paru Integration
 
 Usage: $0 [target]
 
@@ -163,7 +247,18 @@ This script validates:
 - Required variables (pkgname, pkgver, pkgrel, arch)
 - Required functions (package)
 - Package-specific requirements
+- Dependency availability (with paru if available)
 - namcap analysis (if available)
+
+Features:
+- Paru integration for dependency validation
+- AUR package detection
+- Official repository checking
+- Missing dependency reporting
+
+Tools used:
+- Paru: $(command -v paru >/dev/null && echo "Available" || echo "Not available")
+- Namcap: $(command -v namcap >/dev/null && echo "Available" || echo "Not available")
 
 No root privileges required - this only tests syntax and structure.
 EOF

@@ -30,11 +30,12 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# Check required dependencies
+# Check required dependencies including aurutils and paru
 check_dependencies() {
     print_status "Checking dependencies..."
     
     local missing_deps=()
+    local optional_deps=()
     
     # Check for devtools (provides pkgctl)
     if ! command -v pkgctl &> /dev/null; then
@@ -46,13 +47,37 @@ check_dependencies() {
         missing_deps+=("base-devel") 
     fi
     
+    # Check for optional aurutils and paru
+    if ! command -v aur &> /dev/null; then
+        optional_deps+=("aurutils")
+    fi
+    
+    if ! command -v paru &> /dev/null; then
+        optional_deps+=("paru")
+    fi
+    
     if [[ ${#missing_deps[@]} -gt 0 ]]; then
-        print_error "Missing dependencies: ${missing_deps[*]}"
+        print_error "Missing required dependencies: ${missing_deps[*]}"
         print_status "Install with: sudo pacman -S ${missing_deps[*]}"
         exit 1
     fi
     
-    print_success "All dependencies available"
+    if [[ ${#optional_deps[@]} -gt 0 ]]; then
+        print_warning "Optional dependencies not found: ${optional_deps[*]}"
+        print_status "For enhanced functionality, consider installing:"
+        print_status "  - aurutils: Advanced repository management"
+        print_status "  - paru: AUR helper for dependency resolution"
+    fi
+    
+    print_success "All required dependencies available"
+    
+    # Show available tools
+    echo
+    print_status "Available tools:"
+    printf "  %-12s %s\\n" "pkgctl:" "$(command -v pkgctl >/dev/null && echo "✓ Available" || echo "✗ Missing")"
+    printf "  %-12s %s\\n" "aurutils:" "$(command -v aur >/dev/null && echo "✓ Available" || echo "✗ Missing")"
+    printf "  %-12s %s\\n" "paru:" "$(command -v paru >/dev/null && echo "✓ Available" || echo "✗ Missing")"
+    printf "  %-12s %s\\n" "namcap:" "$(command -v namcap >/dev/null && echo "✓ Available" || echo "✗ Missing")"
 }
 
 # Get package dependencies from PKGBUILD
@@ -157,15 +182,53 @@ get_build_order() {
     printf '%s\n' "${result[@]}"
 }
 
-# Build single package using pkgctl
+# Install dependencies with paru if available
+install_build_dependencies() {
+    local package_dir="$1"
+    local pkgbuild="$package_dir/PKGBUILD"
+    
+    if ! command -v paru &> /dev/null; then
+        print_warning "Paru not available, skipping dependency installation"
+        return 0
+    fi
+    
+    print_status "Installing build dependencies with paru..."
+    
+    # Extract dependencies from PKGBUILD
+    local all_deps=()
+    (
+        cd "$package_dir"
+        source "$pkgbuild" 2>/dev/null
+        
+        # Combine makedepends and depends, excluding modern-cli-* packages
+        for dep in "${makedepends[@]}" "${depends[@]}"; do
+            [[ -z "$dep" ]] && continue
+            [[ "$dep" == modern-cli-* ]] && continue
+            all_deps+=("$dep")
+        done
+        
+        if [[ ${#all_deps[@]} -gt 0 ]]; then
+            print_status "Installing dependencies: ${all_deps[*]}"
+            # Use paru to install dependencies
+            paru -S --needed --noconfirm "${all_deps[@]}" || true
+        else
+            print_status "No external dependencies to install"
+        fi
+    )
+}
+
+# Build single package using pkgctl with aurutils integration
 build_package() {
     local package_dir="$1"
     local package_name="$(basename "$package_dir")"
     
-    print_status "Building package with pkgctl: $package_name"
+    print_status "Building package: $package_name"
     
     # Create build directory
     mkdir -p "$BUILD_DIR"
+    
+    # Install dependencies with paru if available
+    install_build_dependencies "$package_dir"
     
     # Copy package to temporary build directory
     local temp_build_dir=$(mktemp -d)
@@ -176,39 +239,64 @@ build_package() {
     # Clean any existing packages
     rm -f *.pkg.tar.* 
     
-    # Build with pkgctl in clean chroot
-    if pkgctl build --clean; then
-        print_success "Built $package_name successfully with pkgctl"
+    # Try aurutils build first if available
+    if command -v aur &> /dev/null; then
+        print_status "Attempting build with aurutils..."
         
-        # Move built packages to build directory
-        if ls *.pkg.tar.* 1> /dev/null 2>&1; then
-            mv *.pkg.tar.* "$BUILD_DIR/"
-            print_success "Moved packages to $BUILD_DIR"
-        else
-            print_warning "No packages found after build"
-        fi
-        
-        # Cleanup temp directory
-        rm -rf "$temp_build_dir"
-        return 0
-    else
-        print_warning "pkgctl build failed, trying fallback makepkg..."
-        
-        # Fallback to makepkg
-        if makepkg -sf; then
-            print_success "Built $package_name with makepkg fallback"
+        # Use aur build for consistent building
+        if aur build --syncdeps --noconfirm; then
+            print_success "Built $package_name successfully with aurutils"
             
+            # Move built packages to build directory
             if ls *.pkg.tar.* 1> /dev/null 2>&1; then
                 mv *.pkg.tar.* "$BUILD_DIR/"
+                print_success "Moved packages to $BUILD_DIR"
             fi
             
             rm -rf "$temp_build_dir"
             return 0
         else
-            print_error "Failed to build $package_name with both pkgctl and makepkg"
-            rm -rf "$temp_build_dir"
-            return 1
+            print_warning "Aurutils build failed, trying pkgctl..."
         fi
+    fi
+    
+    # Try pkgctl build
+    if command -v pkgctl &> /dev/null; then
+        print_status "Building with pkgctl..."
+        
+        if pkgctl build --clean; then
+            print_success "Built $package_name successfully with pkgctl"
+            
+            # Move built packages to build directory
+            if ls *.pkg.tar.* 1> /dev/null 2>&1; then
+                mv *.pkg.tar.* "$BUILD_DIR/"
+                print_success "Moved packages to $BUILD_DIR"
+            else
+                print_warning "No packages found after build"
+            fi
+            
+            rm -rf "$temp_build_dir"
+            return 0
+        else
+            print_warning "pkgctl build failed, trying fallback makepkg..."
+        fi
+    fi
+    
+    # Fallback to makepkg
+    print_status "Using makepkg fallback..."
+    if makepkg -sf; then
+        print_success "Built $package_name with makepkg fallback"
+        
+        if ls *.pkg.tar.* 1> /dev/null 2>&1; then
+            mv *.pkg.tar.* "$BUILD_DIR/"
+        fi
+        
+        rm -rf "$temp_build_dir"
+        return 0
+    else
+        print_error "Failed to build $package_name with all methods"
+        rm -rf "$temp_build_dir"
+        return 1
     fi
 }
 
@@ -438,12 +526,12 @@ main() {
             
         "help"|*)
             cat << EOF
-Modern CLI Package Build Script
+Modern CLI Package Build Script with Aurutils and Paru Integration
 
 Usage: $0 <command> [options]
 
 Commands:
-  build [package]           Build package(s) using pkgctl with dependency resolution
+  build [package]           Build package(s) with intelligent tool selection
   deps                      Show package dependencies and build order
   version <pkg> <ver>       Update package version
   version-all <version>     Update all packages to version
@@ -460,15 +548,30 @@ Examples:
   $0 list                           # Show package versions
   $0 clean                          # Clean build files
 
+Build Tools (in priority order):
+1. Aurutils (aur build) - Advanced AUR-aware building
+2. Pkgctl - Reproducible chroot builds  
+3. Makepkg - Traditional fallback
+
 Features:
-- Uses pkgctl build for reproducible chroot builds
-- Automatic dependency resolution and build ordering
-- Fallback to makepkg if pkgctl fails
+- Intelligent build tool selection
+- Paru integration for dependency resolution
+- Automatic dependency installation
+- Dependency-aware build ordering
 - Modern repository database format (.tar.xz)
 
 Requirements:
 - devtools package (for pkgctl)
 - base-devel package group
+
+Optional (for enhanced functionality):
+- aurutils - Advanced repository management
+- paru - AUR helper for dependency resolution
+
+Current Tool Status:
+  Aurutils: $(command -v aur >/dev/null && echo "Available" || echo "Not available")
+  Paru: $(command -v paru >/dev/null && echo "Available" || echo "Not available")
+  Pkgctl: $(command -v pkgctl >/dev/null && echo "Available" || echo "Not available")
 
 EOF
             ;;

@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
-# scripts/build-repo.sh - Repository management and update script
+# scripts/build-repo.sh - Repository management and update script with aurutils integration
 
 set -euo pipefail
 
-REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/..)" && pwd)"
+REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BUILD_DIR="$REPO_DIR/x86_64"
 REPO_NAME="modern-cli-repo"
+AUR_REPO_NAME="modern-cli"
 
 # Colors
 RED='\033[0;31m'
@@ -30,7 +31,44 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# Add packages to repository database
+# Check if aurutils is available
+check_aurutils() {
+    if command -v aur &> /dev/null; then
+        print_status "Using aurutils for repository management"
+        return 0
+    else
+        print_warning "Aurutils not found, using traditional repo-add"
+        return 1
+    fi
+}
+
+# Check if repoctl is available
+check_repoctl() {
+    if command -v repoctl &> /dev/null; then
+        print_status "Using repoctl for repository management"
+        return 0
+    else
+        print_warning "Repoctl not found"
+        return 1
+    fi
+}
+
+# Initialize aurutils repository if available
+init_aur_repo() {
+    if check_aurutils; then
+        local repo_dir="$HOME/.cache/aurutils/$AUR_REPO_NAME"
+        
+        if [[ ! -d "$repo_dir" ]]; then
+            print_status "Initializing aurutils repository: $AUR_REPO_NAME"
+            aur repo --init "$AUR_REPO_NAME"
+            print_success "Aurutils repository initialized"
+        else
+            print_status "Aurutils repository already exists: $AUR_REPO_NAME"
+        fi
+    fi
+}
+
+# Add packages to repository database with aurutils integration
 add_packages_to_repo() {
     print_status "Adding packages to repository..."
     
@@ -40,6 +78,47 @@ add_packages_to_repo() {
         print_error "No packages found in build directory: $BUILD_DIR"
         return 1
     fi
+    
+    # Try repoctl first if available
+    if check_repoctl; then
+        print_status "Using repoctl to add packages to repository"
+        
+        # Use repoctl to add packages
+        if repoctl add *.pkg.tar.*; then
+            print_success "Packages added to repository using repoctl"
+            return 0
+        else
+            print_warning "Repoctl failed, trying aurutils..."
+        fi
+    fi
+    
+    # Try aurutils if available
+    if check_aurutils; then
+        print_status "Using aurutils to add packages to repository"
+        
+        # Initialize repository if needed
+        init_aur_repo
+        
+        # Add packages using aurutils
+        if aur repo --add "$AUR_REPO_NAME" *.pkg.tar.*; then
+            print_success "Packages added to aurutils repository"
+            
+            # Also create traditional database for compatibility
+            rm -f "${REPO_NAME}.db"* "${REPO_NAME}.files"*
+            if repo-add "${REPO_NAME}.db.tar.xz" *.pkg.tar.*; then
+                ln -sf "${REPO_NAME}.db.tar.xz" "${REPO_NAME}.db"
+                ln -sf "${REPO_NAME}.files.tar.xz" "${REPO_NAME}.files"
+                print_success "Traditional repository database also created"
+            fi
+            
+            return 0
+        else
+            print_warning "Aurutils failed, falling back to traditional method"
+        fi
+    fi
+    
+    # Fallback to traditional method
+    print_status "Using traditional repo-add method"
     
     # Remove old database files
     rm -f "${REPO_NAME}.db"* "${REPO_NAME}.files"*
@@ -231,9 +310,19 @@ main() {
             clean_repo
             ;;
             
+        "init")
+            # Initialize aurutils repository
+            if check_aurutils; then
+                init_aur_repo
+            else
+                print_error "Aurutils not available for repository initialization"
+                exit 1
+            fi
+            ;;
+            
         "help"|*)
             cat << EOF
-Repository Management Script
+Repository Management Script with Aurutils Integration
 
 Usage: $0 <command>
 
@@ -242,6 +331,7 @@ Commands:
   status/info         Show repository status and package list
   verify/check        Verify repository integrity
   clean               Clean repository (remove all packages and database)
+  init                Initialize aurutils repository
   help                Show this help
 
 Examples:
@@ -249,11 +339,18 @@ Examples:
   $0 status           # Show repository information
   $0 verify           # Check repository integrity
   $0 clean            # Clean repository
+  $0 init             # Initialize aurutils repository
 
 Repository Details:
-  - Name: $REPO_NAME
+  - Name: $REPO_NAME (traditional), $AUR_REPO_NAME (aurutils)
   - Location: $BUILD_DIR
   - Format: Modern .tar.xz database format
+  - Aurutils: $(command -v aur >/dev/null && echo "Available" || echo "Not available")
+  
+Features:
+  - Automatic aurutils integration when available
+  - Fallback to traditional repo-add method
+  - Dual repository database creation for compatibility
   
 Note: This script manages the repository database. Use scripts/update-packages.sh 
 to build packages first.
